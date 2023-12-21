@@ -1,44 +1,58 @@
 import fetchImg from './fetch-img';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import SimpleLightbox from 'simplelightbox';
+import { v4 as uuidv4 } from 'uuid';
 
-const formEl = document.querySelector('.form');
-const gallery = document.querySelector('.gallery');
-formEl.addEventListener('submit', onBtnSubmit);
+const inputEl = document.querySelector('.input');
+const searchBtn = document.querySelector('.btn');
+const imageList = document.querySelector('.image-list');
 
-function onBtnSubmit(e) {
-  e.preventDefault();
+searchBtn.addEventListener('click', onSearchBtnClick);
+imageList.addEventListener('click', onCardClick);
 
-  const searchQuery = e.target.elements.query.value;
-  formEl.elements.query.value = '';
-  fetchImg(searchQuery).then(({ hits }) => {
-    gallery.insertAdjacentHTML('beforeend', render(hits));
-
-    const lightBox = new SimpleLightbox('.gallery a', {
-      captionsData: `alt`,
-      captionDelay: 250,
-      scaleImageToRatio: true,
-    });
+function onSearchBtnClick() {
+  const query = inputEl.value;
+  fetchImg(query).then(res => {
+    imageList.insertAdjacentHTML('beforeend', renderImages(res.hits));
   });
 }
 
-gallery.addEventListener('click', onGalleryCardClick);
-
-function render(hits) {
-  return hits.map(
-    ({ largeImageURL, tags, webformatURL }) => `<li >
-   <a class="gallery__item" href="${largeImageURL}">
-   <img class="gallery__img" src = "${webformatURL}" alt = "${tags}" width="340" />
-   </a> 
-   </li>
+function renderImages(items) {
+  return items
+    .map(
+      ({ largeImageURL, tags, id }) =>
+        `
+      <a class = "image-link"  href = "${largeImageURL}"  >
+      <img class = "img" src = "${largeImageURL}" alt = '${id}' >
+      </a>
+   
+      
+      
     `
-  );
+    )
+    .join('');
 }
 
-function onGalleryCardClick(e) {
+function onCardClick(e) {
   e.preventDefault();
-
-  if (!e.target.classList.contains(`gallery__image`)) {
+  if (!e.target.classList.contains('img')) {
     return;
   }
+
+  let lightBox = new SimpleLightbox('.image-list  a', {
+    captionsData: `id`,
+    captionDelay: 250,
+  });
+  lightBox.open();
 }
+
+// const time = document.querySelector('.time');
+
+// function updateTime() {
+//   setInterval(() => {
+//     time.textContent = new Date().toLocaleTimeString('uk');
+//   }, 1000);
+// }
+// updateTime();
+const id = uuidv4();
+[...id].map(item => console.log(item.toString(16).padStart(2, '0')));
